@@ -20,10 +20,34 @@ export type CartItem = {
 
 export type Order = {
   id: string;
-  customer: string;
-  items: string;
+  customer_name: string;
+  phone: string;
+  address: string;
+  payment: string;
+  items_summary: string;
   total: number;
   status: string;
+  created_at: string;
+};
+
+export type StoreSettings = {
+  store_name: string;
+  whatsapp_number: string;
+  address: string;
+  eta_placed_mins: number;
+  eta_preparing_mins: number;
+  eta_on_the_way_mins: number;
+};
+
+export type MatcherOption = { id: number; kind: "taste" | "dietary" | "goal"; label: string; sort: number };
+
+export const DEFAULT_SETTINGS: StoreSettings = {
+  store_name: "Giant Juice",
+  whatsapp_number: "",
+  address: "",
+  eta_placed_mins: 30,
+  eta_preparing_mins: 20,
+  eta_on_the_way_mins: 12,
 };
 
 export const CATEGORIES = ["All", "Detox", "Tropical", "Protein Booster", "Smoothie"];
@@ -36,19 +60,35 @@ export const TOPPINGS = [
   { name: "Nata de Coco", price: 3000 },
 ];
 export const PAYMENTS = ["BCA Virtual Account", "GoPay / QRIS", "Cash on Delivery"];
-export const WA_URL =
-  "https://wa.me/6281234567890?text=Halo%20FreshSqueeze,%20saya%20mau%20pesan%20jus%20segar!";
-
-export const INITIAL_PRODUCTS: Product[] = [
-  { id: 1, name: "Green Glow Detox", category: "Detox", price: 35000, tag: "Organic", description: "Kale, spinach, green apple, cucumber, lemon, and ginger for ultimate cleansing.", image: "https://images.unsplash.com/photo-1610970881699-44a5587cabec?auto=format&fit=crop&w=600&q=80" },
-  { id: 2, name: "Tropical Sunrise", category: "Tropical", price: 32000, tag: "Bestseller", description: "Fresh mango, pineapple, passion fruit, and a hint of mint.", image: "https://images.unsplash.com/photo-1540420773420-3366772f4999?auto=format&fit=crop&w=600&q=80" },
-  { id: 3, name: "Power Protein Banana", category: "Protein Booster", price: 40000, tag: "High Protein", description: "Whey protein, banana, peanut butter, oat milk, and chia seeds.", image: "https://images.unsplash.com/photo-1556881286-fc6915169721?auto=format&fit=crop&w=600&q=80" },
-  { id: 4, name: "Berry Immunity Blast", category: "Detox", price: 38000, tag: "Sugar-Free", description: "Strawberry, blueberry, raspberry, beet, and coconut water.", image: "https://images.unsplash.com/photo-1553530666-ba11a7da3888?auto=format&fit=crop&w=600&q=80" },
-];
 
 export const rp = (n: number) => "Rp " + n.toLocaleString("id-ID");
 
-/** Placeholder webhook hook — connect Make.com / n8n / API here later. */
-export async function submitToWebhook(type: string, payload: unknown) {
-  console.info(`[webhook:${type}]`, payload);
+/** Price of one drink: base price plus each chosen known topping. Unknown toppings are ignored. */
+export function unitPrice(basePrice: number, toppings: string[]) {
+  const chosen = new Set(toppings);
+  return basePrice + TOPPINGS.filter((t) => chosen.has(t.name)).reduce((s, t) => s + t.price, 0);
+}
+
+/** Normalize an Indonesian phone number to 62xxxxxxxx digits. */
+export function normalizePhone(raw: string) {
+  let d = raw.replace(/\D/g, "");
+  if (d.startsWith("0")) d = "62" + d.slice(1);
+  else if (d.startsWith("8")) d = "62" + d;
+  return d;
+}
+
+export function waLink(number: string, storeName: string) {
+  const n = normalizePhone(number);
+  if (!n) return "";
+  return `https://wa.me/${n}?text=${encodeURIComponent(`Halo ${storeName}, saya mau pesan jus segar!`)}`;
+}
+
+/** ETA label shown to customers for a given status. */
+export function etaFor(status: string, s: StoreSettings) {
+  switch (status) {
+    case "Order Placed": return `${s.eta_placed_mins} mins`;
+    case "Preparing": return `${s.eta_preparing_mins} mins`;
+    case "On the Way": return `${s.eta_on_the_way_mins} mins`;
+    default: return "Arrived";
+  }
 }

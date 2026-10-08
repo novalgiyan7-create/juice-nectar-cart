@@ -1,5 +1,5 @@
 # Roadmap
-- [ ] Send each checkout order to the owner's WhatsApp (needs provider + credentials)
-- [ ] Replace placeholder WhatsApp number, sample customers, delivery times with real store details (needs details)
-- [ ] Expand recommendation taste/dietary/goal options; editable in Admin
-- [ ] Persist juices, orders, statuses and matcher options in a database (Lovable Cloud); protect Admin with login
+- [x] Send each checkout order to the owner's WhatsApp via Fonnte (needs FONNTE_TOKEN)
+- [x] Store details editable in Admin (name Giant Juice; WhatsApp number/address/times to be filled by owner)
+- [x] Expand matcher options; editable in Admin
+- [x] Persist juices, orders, statuses and options in Lovable Cloud; Admin behind login
