@@ -3,8 +3,8 @@ import { X } from "lucide-react";
 import { ICE, SWEET, TOPPINGS, rp, type CartItem, type Product } from "@/lib/juice-data";
 
 export function CustomizerModal({ product, onClose, onAdd }: { product: Product; onClose: () => void; onAdd: (i: CartItem) => void }) {
-  const [ice, setIce] = useState(ICE[0]);
-  const [sweet, setSweet] = useState(SWEET[0]);
+  const [ice, setIce] = useState(ICE[0]!);
+  const [sweet, setSweet] = useState(SWEET[0]!);
   const [tops, setTops] = useState<string[]>([]);
   const unit = product.price + TOPPINGS.filter((t) => tops.includes(t.name)).reduce((s, t) => s + t.price, 0);
 

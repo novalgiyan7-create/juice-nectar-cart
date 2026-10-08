@@ -9,7 +9,7 @@ export function CartDrawer({ open, items, onClose, onQty, onRemove, onCheckout }
   onQty: (key: string, d: number) => void; onRemove: (key: string) => void;
   onCheckout: (d: CheckoutData) => void;
 }) {
-  const [form, setForm] = useState<CheckoutData>({ name: "", phone: "", address: "", payment: PAYMENTS[0] });
+  const [form, setForm] = useState<CheckoutData>({ name: "", phone: "", address: "", payment: PAYMENTS[0]! });
   const total = items.reduce((s, i) => s + i.unitPrice * i.qty, 0);
   const field = "w-full rounded-xl border border-input bg-background px-4 py-2.5 text-sm outline-none focus:ring-2 focus:ring-ring";
 

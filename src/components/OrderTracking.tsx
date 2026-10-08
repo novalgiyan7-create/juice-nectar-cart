@@ -3,7 +3,7 @@ import { STATUSES, type Order } from "@/lib/juice-data";
 
 export function OrderTracking({ order }: { order: Order }) {
   const idx = STATUSES.indexOf(order.status);
-  const eta = ["25 mins", "18 mins", "12 mins", "Arrived"][idx];
+  const eta = ["25 mins", "18 mins", "12 mins", "Arrived"][idx] ?? "";
   return (
     <section id="tracking" className="py-16 md:py-24">
       <div className="mx-auto max-w-4xl px-4">
