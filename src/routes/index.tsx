@@ -7,6 +7,7 @@ import { CategoryFilter, ProductGrid } from "@/components/Catalog";
 import { CustomizerModal } from "@/components/CustomizerModal";
 import { CartDrawer, type CheckoutData } from "@/components/CartDrawer";
 import { OrderTracking } from "@/components/OrderTracking";
+import { JuiceMatcher } from "@/components/JuiceMatcher";
 import { AdminPanel } from "@/components/AdminPanel";
 import { FAQ, Footer, FloatingWhatsApp } from "@/components/FAQFooter";
 import { INITIAL_PRODUCTS, submitToWebhook, type CartItem, type Order, type Product } from "@/lib/juice-data";
@@ -86,6 +87,7 @@ function Index() {
           <ProductGrid items={filtered} onOpen={setSelected} />
         </div>
       </section>
+      <JuiceMatcher products={products} onOpen={setSelected} />
       {tracked && <OrderTracking order={tracked} />}
       <AdminPanel products={products} setProducts={setProducts} orders={orders} setOrders={setOrders} />
       <FAQ />
