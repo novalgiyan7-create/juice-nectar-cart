@@ -35,7 +35,7 @@ function AuthForm() {
       ? await supabase.auth.signInWithPassword({ email, password })
       : await supabase.auth.signUp({ email, password, options: { emailRedirectTo: window.location.origin + "/#admin" } });
     setBusy(false);
-    if (error) return toast.error(error.message);
+    if (error) { toast.error(error.message); return; }
     if (mode === "up" && !data.session) toast.success("Check your email to confirm your account, then sign in.");
   };
   return (
@@ -64,7 +64,7 @@ function MenuTab() {
     e.preventDefault();
     const row = { ...form, image: form.image || "https://images.unsplash.com/photo-1600271886742-f049cd451bba?auto=format&fit=crop&w=600&q=80" };
     const { error } = editing ? await supabase.from("products").update(row).eq("id", editing.id) : await supabase.from("products").insert(row);
-    if (error) return toast.error(error.message);
+    if (error) { toast.error(error.message); return; }
     toast.success("Menu saved"); setShow(false); setEditing(null); setForm(empty); refresh();
   };
   const remove = async (p: Product) => {
@@ -150,7 +150,7 @@ function OptionsTab() {
     if (!label) return;
     const sort = Math.max(0, ...options.filter((o) => o.kind === kind).map((o) => o.sort)) + 1;
     const { error } = await supabase.from("matcher_options").insert({ kind, label: label.slice(0, 40), sort });
-    if (error) return toast.error(error.message);
+    if (error) { toast.error(error.message); return; }
     setDrafts({ ...drafts, [kind]: "" }); refresh();
   };
   const remove = async (id: number) => {
@@ -189,7 +189,7 @@ function SettingsTab() {
   const save = async (e: React.FormEvent) => {
     e.preventDefault();
     const { error } = await supabase.from("store_settings").update({ ...form, updated_at: new Date().toISOString() }).eq("id", 1);
-    if (error) return toast.error(error.message);
+    if (error) { toast.error(error.message); return; }
     toast.success("Store details saved"); qc.invalidateQueries({ queryKey: ["store_settings"] });
   };
   const num = (k: keyof StoreSettings, label: string) => (

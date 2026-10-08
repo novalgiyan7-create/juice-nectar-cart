@@ -72,7 +72,7 @@ function Index() {
           items: cart.map((i) => ({ productId: i.product.id, qty: i.qty, ice: i.ice, sweet: i.sweet, toppings: i.toppings })),
         },
       });
-      if (!r.ok) return toast.error(r.error);
+      if (!r.ok) { toast.error(r.error); return; }
       localStorage.setItem(ORDER_KEY, r.id);
       setTrackId(r.id);
       setCart([]);
