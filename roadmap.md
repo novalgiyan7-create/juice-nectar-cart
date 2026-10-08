@@ -1,5 +1,5 @@
 # Roadmap
-- [x] Send each checkout order to the owner's WhatsApp via Fonnte (needs FONNTE_TOKEN)
-- [x] Store details editable in Admin (name Giant Juice; WhatsApp number/address/times to be filled by owner)
+- [ ] WhatsApp alerts via Fonnte: built; waiting for owner to add FONNTE_TOKEN
+- [ ] Store details: editable in Admin; waiting for owner to enter WhatsApp number, address, delivery times
 - [x] Expand matcher options; editable in Admin
 - [x] Persist juices, orders, statuses and options in Lovable Cloud; Admin behind login
