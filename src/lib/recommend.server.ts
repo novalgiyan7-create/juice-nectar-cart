@@ -43,7 +43,7 @@ export async function recommendJuices(menu: MenuItem[], prefs: Prefs): Promise<R
   const result = streamText({
     model: provider.responses("openai/gpt-6-astra"),
     instructions:
-      "You are FreshSqueeze's friendly juice expert. Recommend 1 to 3 juices ONLY from the provided menu, using their exact ids. " +
+      "You are Giant Juice's friendly juice expert. Recommend 1 to 3 juices ONLY from the provided menu, using their exact ids. " +
       "Strictly respect dietary needs and allergies (e.g. never suggest peanut butter for nut allergy, whey for vegan or dairy-free, added sweet for low sugar). " +
       "If nothing fits, return an empty picks list and explain in summary. Keep summary under 40 words and each reason under 25 words. You may suggest customizations like 'Unsweetened' or toppings (Chia Seeds, Aloe Vera, Nata de Coco) in reasons.",
     prompt:

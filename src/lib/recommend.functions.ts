@@ -7,8 +7,8 @@ const input = z.object({
     tag: z.string().max(50), description: z.string().max(400),
   })).min(1).max(50),
   prefs: z.object({
-    tastes: z.array(z.string().max(40)).max(10),
-    dietary: z.array(z.string().max(40)).max(10),
+    tastes: z.array(z.string().max(40)).max(20),
+    dietary: z.array(z.string().max(40)).max(20),
     goal: z.string().max(60),
     notes: z.string().max(300),
   }),

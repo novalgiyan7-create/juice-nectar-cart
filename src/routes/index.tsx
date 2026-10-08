@@ -1,5 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { useServerFn } from "@tanstack/react-start";
 import { Toaster, toast } from "sonner";
 import { Navbar } from "@/components/Navbar";
 import { Hero } from "@/components/Hero";
@@ -10,15 +12,17 @@ import { OrderTracking } from "@/components/OrderTracking";
 import { JuiceMatcher } from "@/components/JuiceMatcher";
 import { AdminPanel } from "@/components/AdminPanel";
 import { FAQ, Footer, FloatingWhatsApp } from "@/components/FAQFooter";
-import { INITIAL_PRODUCTS, submitToWebhook, type CartItem, type Order, type Product } from "@/lib/juice-data";
+import { DEFAULT_SETTINGS, waLink, type CartItem, type Product } from "@/lib/juice-data";
+import { optionsQuery, productsQuery, settingsQuery } from "@/lib/store-queries";
+import { placeOrder } from "@/lib/orders.functions";
 
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "FreshSqueeze — Fresh Cold-Pressed Juice Delivery" },
-      { name: "description", content: "Order organic cold-pressed juices, detox blends and protein smoothies. Delivered fresh in 30 minutes." },
-      { property: "og:title", content: "FreshSqueeze — Fresh Cold-Pressed Juice Delivery" },
-      { property: "og:description", content: "Organic juices & smoothies, customized your way and delivered in 30 minutes." },
+      { title: "Giant Juice — Fresh Cold-Pressed Juice Delivery" },
+      { name: "description", content: "Order organic cold-pressed juices, detox blends and protein smoothies from Giant Juice, delivered fresh." },
+      { property: "og:title", content: "Giant Juice — Fresh Cold-Pressed Juice Delivery" },
+      { property: "og:description", content: "Organic juices & smoothies, customized your way and delivered fresh." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
@@ -26,18 +30,24 @@ export const Route = createFileRoute("/")({
   component: Index,
 });
 
+const ORDER_KEY = "gj_last_order";
+
 function Index() {
-  const [products, setProducts] = useState<Product[]>(INITIAL_PRODUCTS);
-  const [orders, setOrders] = useState<Order[]>([
-    { id: "FS-8821", customer: "Rina Putri", items: "2× Green Glow Detox", total: 70000, status: "On the Way" },
-    { id: "FS-8820", customer: "Budi Santoso", items: "1× Power Protein Banana", total: 45000, status: "Preparing" },
-  ]);
+  const { data: products = [] } = useQuery(productsQuery);
+  const { data: options = [] } = useQuery(optionsQuery);
+  const { data: settings = DEFAULT_SETTINGS } = useQuery(settingsQuery);
+  const submitOrder = useServerFn(placeOrder);
+
   const [cat, setCat] = useState("All");
   const [q, setQ] = useState("");
   const [selected, setSelected] = useState<Product | null>(null);
   const [cart, setCart] = useState<CartItem[]>([]);
   const [cartOpen, setCartOpen] = useState(false);
-  const [trackId, setTrackId] = useState("FS-8821");
+  const [trackId, setTrackId] = useState<string | null>(null);
+
+  useEffect(() => { setTrackId(localStorage.getItem(ORDER_KEY)); }, []);
+
+  const waUrl = waLink(settings.whatsapp_number, settings.store_name);
 
   const filtered = useMemo(() => {
     const s = q.toLowerCase();
@@ -55,27 +65,28 @@ function Index() {
   };
 
   const checkout = async (d: CheckoutData) => {
-    const id = `FS-${Math.floor(8822 + Math.random() * 1000)}`;
-    const order: Order = {
-      id, customer: d.name,
-      items: cart.map((i) => `${i.qty}× ${i.product.name}`).join(", "),
-      total: cart.reduce((s, i) => s + i.unitPrice * i.qty, 0),
-      status: "Order Placed",
-    };
-    await submitToWebhook("order", { ...d, order, cart });
-    setOrders((o) => [order, ...o]);
-    setTrackId(id);
-    setCart([]);
-    setCartOpen(false);
-    toast.success(`Order #${id} placed! Track it below.`);
-    setTimeout(() => document.getElementById("tracking")?.scrollIntoView({ behavior: "smooth" }), 300);
+    try {
+      const r = await submitOrder({
+        data: {
+          ...d,
+          items: cart.map((i) => ({ productId: i.product.id, qty: i.qty, ice: i.ice, sweet: i.sweet, toppings: i.toppings })),
+        },
+      });
+      if (!r.ok) return toast.error(r.error);
+      localStorage.setItem(ORDER_KEY, r.id);
+      setTrackId(r.id);
+      setCart([]);
+      setCartOpen(false);
+      toast.success(`Order #${r.id} placed! Track it below.`);
+      setTimeout(() => document.getElementById("tracking")?.scrollIntoView({ behavior: "smooth" }), 300);
+    } catch {
+      toast.error("Please check your details and try again.");
+    }
   };
-
-  const tracked = orders.find((o) => o.id === trackId) ?? orders[0];
 
   return (
     <div className="min-h-screen bg-background">
-      <Navbar count={cart.reduce((s, i) => s + i.qty, 0)} onCart={() => setCartOpen(true)} />
+      <Navbar count={cart.reduce((s, i) => s + i.qty, 0)} onCart={() => setCartOpen(true)} storeName={settings.store_name} waUrl={waUrl} />
       <Hero />
       <section id="menu" className="py-16 md:py-24">
         <div className="mx-auto max-w-7xl space-y-8 px-4">
@@ -87,12 +98,12 @@ function Index() {
           <ProductGrid items={filtered} onOpen={setSelected} />
         </div>
       </section>
-      <JuiceMatcher products={products} onOpen={setSelected} />
-      {tracked && <OrderTracking order={tracked} />}
-      <AdminPanel products={products} setProducts={setProducts} orders={orders} setOrders={setOrders} />
+      <JuiceMatcher products={products} options={options} onOpen={setSelected} />
+      <OrderTracking orderId={trackId} settings={settings} />
+      <AdminPanel />
       <FAQ />
-      <Footer />
-      <FloatingWhatsApp />
+      <Footer storeName={settings.store_name} address={settings.address} waUrl={waUrl} />
+      <FloatingWhatsApp waUrl={waUrl} />
       {selected && <CustomizerModal product={selected} onClose={() => setSelected(null)} onAdd={addToCart} />}
       <CartDrawer open={cartOpen} items={cart} onClose={() => setCartOpen(false)}
         onQty={(k, d) => setCart((c) => c.map((x) => (x.key === k ? { ...x, qty: x.qty + d } : x)).filter((x) => x.qty > 0))}
