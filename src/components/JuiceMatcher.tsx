@@ -2,13 +2,12 @@ import { useState } from "react";
 import { Loader2, Sparkles } from "lucide-react";
 import { useServerFn } from "@tanstack/react-start";
 import { getRecommendations } from "@/lib/recommend.functions";
-import { rp, type Product } from "@/lib/juice-data";
+import { rp, type MatcherOption, type Product } from "@/lib/juice-data";
 
-const TASTES = ["Sweet", "Sour / Tangy", "Fruity", "Green / Earthy", "Creamy", "Refreshing"];
-const DIETARY = ["Vegan", "Dairy-Free", "Nut Allergy", "Low Sugar", "Gluten-Free", "High Protein"];
-const GOALS = ["Detox", "Energy Boost", "Post-Workout", "Immunity", "Just Delicious"];
-
-export function JuiceMatcher({ products, onOpen }: { products: Product[]; onOpen: (p: Product) => void }) {
+export function JuiceMatcher({ products, options, onOpen }: { products: Product[]; options: MatcherOption[]; onOpen: (p: Product) => void }) {
+  const TASTES = options.filter((o) => o.kind === "taste").map((o) => o.label);
+  const DIETARY = options.filter((o) => o.kind === "dietary").map((o) => o.label);
+  const GOALS = options.filter((o) => o.kind === "goal").map((o) => o.label);
   const [tastes, setTastes] = useState<string[]>([]);
   const [dietary, setDietary] = useState<string[]>([]);
   const [goal, setGoal] = useState("");
