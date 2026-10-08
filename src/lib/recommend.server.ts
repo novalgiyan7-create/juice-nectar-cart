@@ -17,7 +17,7 @@ export class GatewayError extends Error {
 }
 
 export async function recommendJuices(menu: MenuItem[], prefs: Prefs): Promise<RecommendResult> {
-  const apiKey = process.env.LOVABLE_API_KEY;
+  const apiKey = process.env['LOVABLE_API_KEY'];
   if (!apiKey) throw new GatewayError(401, "AI is not configured yet.");
 
   let gatewayStatus = 0;
